@@ -9,7 +9,7 @@ app = FastAPI()
 # 실제 사용 시 특정 도메인/포트로 제한하는 것이 보안에 좋습니다.
 origins = [
     "http://localhost:5173",  # Vite dev server
-    "https://mobicompose.vercel.app/",  # Vercel 도메인
+    "https://mobicompose.vercel.app",  # Vercel 도메인
 ]
 
 app.add_middleware(
