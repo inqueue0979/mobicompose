@@ -1,8 +1,24 @@
 from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 import xml.etree.ElementTree as ET
 import re
 
 app = FastAPI()
+
+# 허용할 도메인(Origin) 리스트
+# 실제 사용 시 특정 도메인/포트로 제한하는 것이 보안에 좋습니다.
+origins = [
+    "http://localhost:5173",  # Vite dev server
+    "https://mobicompose.vercel.app/",  # Vercel 도메인
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # 모든 HTTP 메서드를 허용
+    allow_headers=["*"],  # 모든 헤더를 허용
+)
 
 @app.post("/convert")
 async def convert_ms2mml_file(file: UploadFile = File(...)):
@@ -53,22 +69,13 @@ def parse_and_convert_ms2mml(xml_str: str) -> dict:
 
 
 def convert_cdata_to_mml(text: str) -> str:
-    """
-    주어진 ms2mml CDATA 텍스트를 간단한 MML로 치환하는 함수 (예시).
-    """
+    # 개행(\n, \r) 제거
+    text = text.replace('\n', '').replace('\r', '')
+    
+    # 필요 시 앞뒤 공백 제거
     data = text.strip()
 
-    # 볼륨, 템포, 길이 치환
-    data = re.sub(r'v(\d+)', r'V\1', data)
-    data = re.sub(r't(\d+)', r'T\1', data)
-    data = re.sub(r'l(\d+)', r'L\1', data)
+    # 이후 필요한 파싱/치환 로직 수행
+    # 예: data = re.sub(r'v(\d+)', r'V\1', data) 등
 
-    # 쉼표 r -> R
-    data = re.sub(r'(?<![A-Za-z0-9])r', 'R', data)
-
-    # 음계 소문자 -> 대문자
-    notes_lower = ['c', 'd', 'e', 'f', 'g', 'a', 'b']
-    for note in notes_lower:
-        data = data.replace(note, note.upper())
-
-    return data.strip()
+    return data
